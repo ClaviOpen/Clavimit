@@ -10,20 +10,45 @@ For small fixes, documentation improvements, or straightforward bug fixes, feel 
 
 For larger features, cryptographic changes, or architectural changes, please open an issue first so the proposed approach can be discussed before significant work is started.
 
+## How to contribute
+
+To contribute code to Clavimit:
+
+1. Fork the repository and set up your development environment as described below.
+2. Create a branch in your fork for your changes.
+3. Make and test your changes.
+4. Push your branch to your fork.
+5. Open a pull request targeting the `develop` branch of `ClaviOpen/Clavimit`.
+
+For larger features, cryptographic changes, or architectural changes, please open an issue before starting implementation so the proposed approach can be discussed.
+
 ## Development setup
 
-1. Fork the repository.
+1. Fork the `ClaviOpen/Clavimit` repository.
+
 2. Clone your fork:
+
 ```bash
 git clone https://github.com/YOUR_USERNAME/Clavimit.git
+cd Clavimit
 ```
-3. Check out the develop branch: 
-```bash 
+
+3. Check out the `develop` branch:
+
+```bash
 git checkout develop
 ```
-4. Install teh project dependencies: 
+
+4. Install the project dependencies:
+
 ```bash
 npm install
+```
+
+Before starting your changes, create a dedicated branch:
+
+```bash
+git checkout -b your-branch-name
 ```
 
 #### Build for Chrome
@@ -54,7 +79,7 @@ To load it manually:
 2. Navigate to `about:debugging`. 
 3. Select **This Firefox**.
 4. Click **Load Temporary Add-on**.
-5.Select the `dist/firefox` directory.
+5. Select the `dist/firefox/manifest.json` file.
 6. Open Gmail.
 7. Open Clavimit from Chrome and use the side panel to encrypt or decrypt messages.
 
@@ -109,6 +134,8 @@ Documentation issues may concern the README, Privacy Policy, contributing guide,
 Pull requests are welcome.
 
 Pull requests should target the `develop` branch. The `main` branch is reserved for stable releases.
+
+A pull request may target main if this has been agreed in advance, during discussion of the related issue, or when the issue explicitly specifies it. This may be appropriate for certain documentation changes, urgent bug fixes, or other changes that need to be included in the current stable release without waiting for the next development merge.
 
 Please use the provided pull request template and keep each pull request focused on a single issue, feature, or improvement whenever possible.
 
