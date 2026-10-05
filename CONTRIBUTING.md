@@ -170,6 +170,8 @@ Potential longer-term features include:
 * signature verification using user-provided public keys
 * support for additional cryptographic algorithms
 
+Take a look at the [open issues](https://github.com/ClaviOpen/Clavimit/issues) to find something you would like to work on.
+
 ## Security-related changes
 
 Clavimit handles cryptographic operations, cryptographic keys, and email content.

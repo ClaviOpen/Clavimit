@@ -64,10 +64,10 @@ UI improvements, tests, documentation, validation, browser compatibility, and Gm
 If this is your first contribution, these are good places to start:
 
 * [#16 — Improve README.md and CONTRIBUTING.md files](https://github.com/ClaviOpen/Clavimit/issues/16)
-* [#1 — Keep package and manifest versions synchronized](https://github.com/LucaBonamino/Clavimit/issues/1)
-* [See all good first issues](https://github.com/LucaBonamino/Clavimit/issues)
+* [#1 — Keep package and manifest versions synchronized](https://github.com/ClaviOpen/Clavimit/issues/1)
+* [See all good first issues](https://github.com/claviOpen/Clavimit/issues?q=is%3Aissue+state%3Aopen+label%3A%22good+first+issue%22)
 
-For larger tasks, see the open issues.
+For larger tasks, see the [open issues](https://github.com/ClaviOpen/Clavimit/issues).
 
 Read `CONTRIBUTING.md` for development setup, testing, contribution guidelines, and pull-request instructions.
 
