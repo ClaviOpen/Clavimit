@@ -18,7 +18,7 @@ Clavimit does not require an account or a Clavimit server.
   <img src="images/ClavimitKeyGeneration.png" alt="Clavimit key generation view" width="23%" />
 </p>
 
-<p aligh="center"> 
+<p align="center">
    <img src="images/encryptingEmail.png" alt="Clavimit encrypting email view" width="100%">
 </p>
 
@@ -306,9 +306,9 @@ To load it manually:
 2. Navigate to `about:debugging`. 
 3. Select **This Firefox**.
 4. Click **Load Temporary Add-on**.
-5.Select the `dist/firefox/manifest.json` file.
+5. Select the `dist/firefox/manifest.json` file.
 6. Open Gmail.
-7. Open Clavimit from Chrome and use the side panel to encrypt or decrypt messages.
+7. Open Clavimit from Firefox and use the sidebar to encrypt or decrypt messages.
 
 Extensions loaded through `about:debugging` are temporary and must be loaded again after restarting Firefox.
 
@@ -318,4 +318,4 @@ Extensions loaded through `about:debugging` are temporary and must be loaded aga
 
 Clavimit is licensed under the **GNU General Public License v3.0**.
 
-See the [LICENSE](LICENSE) file for details.
+See the [LICENSE](LICENSE.md) file for details.

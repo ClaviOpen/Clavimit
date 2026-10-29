@@ -72,7 +72,7 @@ Run
 ```bash
 npm run build:firefox
 ```
-The generated Chrome extension is written to: `dist/firefox`
+The generated Firefox extension is written to: `dist/firefox`
 
 To load it manually:
 1. Open Firefox.
@@ -81,7 +81,7 @@ To load it manually:
 4. Click **Load Temporary Add-on**.
 5. Select the `dist/firefox/manifest.json` file.
 6. Open Gmail.
-7. Open Clavimit from Chrome and use the side panel to encrypt or decrypt messages.
+7. Open Clavimit from Firefox and use the sidebar to encrypt or decrypt messages.
 
 Extensions loaded through `about:debugging` are temporary and must be loaded again after restarting Firefox.
 
@@ -98,10 +98,10 @@ Please provide enough information to reproduce the issue, including the relevant
 
 When reporting the environment, distinguish between:
 
-* the development version installed using **Load unpacked**
-* the published Chrome Web Store extension
+* the development version installed using **Load unpacked** in Chrome or **Load Temporary Add-on** in Firefox
+* the published Chrome Web Store or Firefox Add-ons extension
 
-The extension version can be found in `chrome://extensions`.
+The extension version can be found in `chrome://extensions` (Chrome) or `about:addons` (Firefox).
 
 Do not include private keys, sensitive email content, or other confidential information in bug reports.
 
@@ -243,4 +243,4 @@ For more details, see the [Privacy Policy](PRIVACY.md).
 
 By contributing to Clavimit, you agree that your contributions will be licensed under the same license as the project: the **GNU General Public License v3.0**.
 
-See the [LICENSE](LICENSE) file for details.
+See the [LICENSE](LICENSE.md) file for details.
