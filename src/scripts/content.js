@@ -9,6 +9,8 @@ import {
     encryptMessage,
     decryptMessage,
     generateKeyPair,
+    importPublicKey,
+    computeFingerprint
 } from "./cryptography.js";
 import {
     getReceivedEmailText,
@@ -159,7 +161,8 @@ publicKeyFile.addEventListener("change", async () => {
         return;
     }
     const text = await file.text();
-    publicKeyInput.value = await file.text();
+    publicKeyInput.value = text;
+    const fingerprint = await computeFingerprint(text);
 });
 
 senderPublicKeyFile.addEventListener("change", async () => {

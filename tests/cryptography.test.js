@@ -47,9 +47,7 @@ describe("encryption and decryption", () => {
         const { publicKey, privateKey } = await generateKeyPair();
 
         const message = "This is a dummy message";
-
         const encrypted = await encryptMessage(message, publicKey);
-
         const decrypted = await decryptMessage(encrypted, privateKey);
 
         expect(decrypted).toBe(message);
@@ -59,9 +57,7 @@ describe("encryption and decryption", () => {
         const { publicKey, privateKey } = await generateKeyPair();
 
         const message = "";
-
         const encrypted = await encryptMessage(message, publicKey);
-
         const decrypted = await decryptMessage(encrypted, privateKey);
 
         expect(decrypted).toBe(message);

@@ -306,3 +306,12 @@ function toPem(buffer, label) {
 
     return `-----BEGIN ${label}-----\n${lines}\n-----END ${label}-----`;
 }
+
+export async function computeFingerprint(publicKey){
+    const key = importPublicKey(publicKey);
+    const digest = await crypto.subtle.digest("SHA-256", key);
+    return Array.from(new Uint8Array(digest))
+        .map(byte => byte.toString(16).padStart(2, "0"))
+        .join(":")
+        .toUpperCase();
+}
