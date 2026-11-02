@@ -163,6 +163,9 @@ publicKeyFile.addEventListener("change", async () => {
     const text = await file.text();
     publicKeyInput.value = text;
     const fingerprint = await computeFingerprint(text);
+    const fingerPrintP = document.getElementById("publicKeyFingerPrint");
+    fingerPrintP.textContent = `SHA-256 fingerprint: ${fingerprint}`;
+    fingerPrintP.hidden = false;
 });
 
 senderPublicKeyFile.addEventListener("change", async () => {
