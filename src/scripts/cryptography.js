@@ -314,12 +314,10 @@ export async function computeFingerprint(pem){
         .replace(/\s+/g, "");
 
     const binary = atob(cleanPem);
-
     const bytes = Uint8Array.from(
         binary,
         char => char.charCodeAt(0),
     );
-    const key = importPublicKey(publicKey);
     const digest = await crypto.subtle.digest("SHA-256", bytes);
     return Array.from(new Uint8Array(digest))
         .map(byte => byte.toString(16).padStart(2, "0"))
