@@ -343,6 +343,9 @@ button.addEventListener("click", async () => {
         button.textContent = "Encrypt Email";
         publicKeyInput.value = "";
         publicKeyFile.value = "";
+        const fingerPrintP = document.getElementById("publicKeyFingerPrint");
+        fingerPrintP.textContent = "";
+        fingerPrintP.hidden = true;
         if (senderPublicKeyInput.value) {
             senderPublicKeyInput.value = "";
             senderPublicKeyFile.value = "";
