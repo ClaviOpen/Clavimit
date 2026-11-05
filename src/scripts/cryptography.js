@@ -127,7 +127,7 @@ export async function importPublicKey(pem) {
                 name: "RSA-OAEP",
                 hash: "SHA-256",
             },
-            false,
+            true,
             ["encrypt"],
         );
     } catch (error) {
@@ -305,4 +305,12 @@ function toPem(buffer, label) {
     const lines = base64.match(/.{1,64}/g).join("\n");
 
     return `-----BEGIN ${label}-----\n${lines}\n-----END ${label}-----`;
+}
+
+export async function computeFingerprint(publicKey) {
+    const spki = await crypto.subtle.exportKey("spki", publicKey);
+    const digest = await crypto.subtle.digest("SHA-256", spki);
+    return Array.from(new Uint8Array(digest))
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join("");
 }

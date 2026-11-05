@@ -9,6 +9,8 @@ import {
     encryptMessage,
     decryptMessage,
     generateKeyPair,
+    computeFingerprint,
+    importPublicKey,
 } from "./cryptography.js";
 import {
     getReceivedEmailText,
@@ -80,6 +82,7 @@ const decryptedText = document.getElementById("decryptedText");
 const encryptWithSenderKeyCheckBox = document.getElementById(
     "encryptWithSenderPublicKey",
 );
+const publicKeyFingerprint = document.getElementById("publicKeyFingerPrint");
 
 // -------- Key generation
 const generateRsaKeyPairButton = document.getElementById("generateKeyPair");
@@ -139,7 +142,7 @@ encryptWithSenderKeyCheckBox.addEventListener("change", () => {
     encryptWithSenderKeyDiv.hidden = !encryptWithSenderKeyCheckBox.checked;
 });
 
-// Import RSA keys by file
+// Import RSA keys
 const privateKeyFile = document.getElementById("privateKeyFile");
 const publicKeyFile = document.getElementById("publicKeyFile");
 const senderPublicKeyFile = document.getElementById("senderPublicKeyFile");
@@ -154,12 +157,18 @@ privateKeyFile.addEventListener("change", async () => {
 });
 
 publicKeyFile.addEventListener("change", async () => {
+    clearEncryptError();
     const file = publicKeyFile.files[0];
-    if (!file) {
-        return;
+    if (!file) return;
+    try {
+        const text = await file.text();
+        if (!text) return;
+        publicKeyInput.value = text;
+        publicKeyInput.dispatchEvent(new Event("input", { bubbles: true }));
+    } catch (error) {
+        console.error("Could not read public key file:", error);
+        showEncryptError("Could not read the selected public key file.");
     }
-    const text = await file.text();
-    publicKeyInput.value = await file.text();
 });
 
 senderPublicKeyFile.addEventListener("change", async () => {
@@ -169,6 +178,27 @@ senderPublicKeyFile.addEventListener("change", async () => {
     }
     const text = await file.text();
     senderPublicKeyInput.value = await file.text();
+});
+
+publicKeyInput.addEventListener("input", async () => {
+    clearEncryptError();
+    publicKeyFingerprint.textContent = "";
+    publicKeyFingerprint.hidden = true;
+    const text = publicKeyInput.value;
+    if (!text.trim()) return;
+    try {
+        const pk = await importPublicKey(text);
+        const fingerprint = await computeFingerprint(pk);
+        if (publicKeyInput.value !== text) return;
+        publicKeyFingerprint.textContent = `SHA-256 fingerprint: ${fingerprint}`;
+        publicKeyFingerprint.hidden = false;
+    } catch (error) {
+        if (publicKeyInput.value !== text) return;
+        console.log("Invalid or incomplete public key:", error);
+        showEncryptError(
+            "Could not compute the fingerprint. Please check that the public key is valid.",
+        );
+    }
 });
 //
 
@@ -281,6 +311,8 @@ button.addEventListener("click", async () => {
         button.textContent = "Encrypt Email";
         publicKeyInput.value = "";
         publicKeyFile.value = "";
+        publicKeyFingerprint.textContent = "";
+        publicKeyFingerprint.hidden = true;
         if (senderPublicKeyInput.value) {
             senderPublicKeyInput.value = "";
             senderPublicKeyFile.value = "";

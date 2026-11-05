@@ -1,6 +1,6 @@
 {
   "name": "Clavimit",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Encrypt and decrypt Gmail messages locally using AES-256-GCM and RSA-OAEP.",
 
   "manifest_version": 3,
