@@ -258,7 +258,6 @@ The next planned improvements focus on extending the current email workflow and 
 
 Longer-term features that may be explored include:
 
-* public-key fingerprint display
 * digital signatures
 * signature verification using user-provided public keys
 * support for additional cryptographic algorithms
