@@ -12,7 +12,7 @@ import {
     importPublicKey,
     validateRsaKeyForEncryption,
     computeFingerprint,
-    importPublicKey
+    importPublicKey,
 } from "./cryptography.js";
 import {
     getReceivedEmailText,
