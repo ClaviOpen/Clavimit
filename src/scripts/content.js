@@ -10,7 +10,7 @@ import {
     decryptMessage,
     generateKeyPair,
     computeFingerprint,
-    importPublicKey
+    importPublicKey,
 } from "./cryptography.js";
 import {
     getReceivedEmailText,
