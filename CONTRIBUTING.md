@@ -165,7 +165,6 @@ Some areas currently planned for development include:
 
 Potential longer-term features include:
 
-* public-key fingerprint display
 * digital signatures
 * signature verification using user-provided public keys
 * support for additional cryptographic algorithms
