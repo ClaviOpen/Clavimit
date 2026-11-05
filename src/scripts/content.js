@@ -174,7 +174,7 @@ publicKeyFile.addEventListener("change", async () => {
     }
 });
 
-senderPublicKeyFile.addEventListener("input", async () => {
+senderPublicKeyFile.addEventListener("change", async () => {
     const file = senderPublicKeyFile.files[0];
     if (!file) {
         return;
