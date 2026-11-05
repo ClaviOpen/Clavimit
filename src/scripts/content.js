@@ -10,6 +10,7 @@ import {
     decryptMessage,
     generateKeyPair,
     computeFingerprint,
+    importPublicKey
 } from "./cryptography.js";
 import {
     getReceivedEmailText,
@@ -158,14 +159,10 @@ privateKeyFile.addEventListener("change", async () => {
 publicKeyFile.addEventListener("change", async () => {
     clearEncryptError();
     const file = publicKeyFile.files[0];
-    if (!file) {
-        return;
-    }
-    const text = await file.text();
-    if (!text) {
-        return;
-    }
+    if (!file) return;
     try {
+        const text = await file.text();
+        if (!text) return;
         publicKeyInput.value = text;
         publicKeyInput.dispatchEvent(new Event("input", { bubbles: true }));
     } catch (error) {
@@ -188,13 +185,15 @@ publicKeyInput.addEventListener("input", async () => {
     publicKeyFingerprint.textContent = "";
     publicKeyFingerprint.hidden = true;
     const text = publicKeyInput.value;
-    if (!text) return;
+    if (!text.trim()) return;
     try {
-        const fingerprint = await computeFingerprint(text);
-        if (publicKeyInput.value.trim() !== text) return;
+        const pk = await importPublicKey(text);
+        const fingerprint = await computeFingerprint(pk);
+        if (publicKeyInput.value !== text) return;
         publicKeyFingerprint.textContent = `SHA-256 fingerprint: ${fingerprint}`;
         publicKeyFingerprint.hidden = false;
     } catch (error) {
+        if (publicKeyInput.value !== text) return;
         console.log("Invalid or incomplete public key:", error);
         showEncryptError(
             "Could not compute the fingerprint. Please check that the public key is valid.",
