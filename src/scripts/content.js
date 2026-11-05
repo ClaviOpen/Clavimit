@@ -167,9 +167,6 @@ publicKeyFile.addEventListener("change", async () => {
     }
     try {
         publicKeyInput.value = text;
-        // const fingerprint = await computeFingerprint(text);
-        // publicKeyFingerprint.textContent = `SHA-256 fingerprint: ${fingerprint}`;
-        // publicKeyFingerprint.hidden = false;
         publicKeyInput.dispatchEvent(new Event("input", { bubbles: true }));
     } catch (error) {
         console.error("Could not read public key file:", error);
