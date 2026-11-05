@@ -208,3 +208,8 @@ input:focus-visible {
 .mit {
     color: var(--accent);
 }
+
+.public-key-fingerprint {
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+}
