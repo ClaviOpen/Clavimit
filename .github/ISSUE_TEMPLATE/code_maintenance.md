@@ -1,7 +1,7 @@
 ---
 name: Code Maintenance
 about: Propose internal improvements that do not change the extension's functionality.
-title: "[Maintenance] "
+title: ""
 labels: maintenance
 assignees: ''
 ---
