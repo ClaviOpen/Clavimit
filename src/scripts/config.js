@@ -11,3 +11,6 @@ export const PAYLOAD_VERSION = 1;
 
 export const ALGORITHM = "AES-256-GCM";
 export const KEY_ALGORITHM = "RSA-OAEP-SHA256";
+
+export const MIN_RSA_ENC_EXPONENT = 65537n;
+export const MAX_RSA_ENC_EXPONENT = 1n << 256n;
