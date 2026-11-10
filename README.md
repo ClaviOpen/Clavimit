@@ -142,6 +142,24 @@ Clavimit currently uses:
 
 Clavimit does not implement cryptographic primitives itself.
 
+### RSA security requirements
+
+Clavimit validates RSA public keys before using them for encryption.
+
+The following requirements are enforced:
+
+- **Modulus length:** At least 2048 bits.
+- **Public exponent:** An odd integer satisfying $65537 \le e < 2^{256}$.
+- **Encryption algorithm:** RSA-OAEP with SHA-256.
+
+Public keys that do not satisfy these requirements are rejected for encryption.
+
+#### Backward compatibility
+
+**Note on Backward compatibility**. Previous versions of Clavimit did not enforce these requirements. Consequently, some messages may have been encrypted using RSA keys that no longer satisfy the current security policy.
+Clavimit continues to support decryption using legacy RSA private keys.
+This allows users to access previously encrypted messages without permitting the creation of new messages using weak RSA public keys.
+
 ## Key ownership
 
 For encryption, Clavimit requires the recipient's **public key**. The sender may optionally provide their own public key to keep a decryptable copy of the message.

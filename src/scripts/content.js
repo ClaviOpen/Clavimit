@@ -9,6 +9,8 @@ import {
     encryptMessage,
     decryptMessage,
     generateKeyPair,
+    importPublicKey,
+    validateRsaKeyForEncryption,
 } from "./cryptography.js";
 import {
     getReceivedEmailText,
@@ -159,7 +161,8 @@ publicKeyFile.addEventListener("change", async () => {
         return;
     }
     const text = await file.text();
-    publicKeyInput.value = await file.text();
+    publicKeyInput.value = text;
+    publicKeyInput.dispatchEvent(new Event("input", { bubbles: true }));
 });
 
 senderPublicKeyFile.addEventListener("change", async () => {
@@ -168,7 +171,66 @@ senderPublicKeyFile.addEventListener("change", async () => {
         return;
     }
     const text = await file.text();
-    senderPublicKeyInput.value = await file.text();
+    senderPublicKeyInput.value = text;
+    senderPublicKeyInput.dispatchEvent(new Event("input", { bubbles: true }));
+});
+
+senderPublicKeyInput.addEventListener("input", async () => {
+    clearEncryptError();
+    const text = senderPublicKeyInput.value;
+    if (!text.trim()) return;
+
+    let key;
+    try {
+        key = await importPublicKey(text);
+        if (senderPublicKeyInput.value !== text) return;
+    } catch (error) {
+        if (senderPublicKeyInput.value !== text) return;
+        console.log("Invalid or incomplete public key:", error);
+        showEncryptError("Could not import public key.");
+        return;
+    }
+    try {
+        validateRsaKeyForEncryption(key);
+    } catch (error) {
+        if (senderPublicKeyInput.value !== text) return;
+
+        console.error("Public key import or validation failed:", error);
+        if (error instanceof ClavimitError) {
+            showEncryptError(error.message);
+        } else {
+            showEncryptError("Could not import or validate public key.");
+        }
+    }
+});
+
+publicKeyInput.addEventListener("input", async () => {
+    clearEncryptError();
+    const text = publicKeyInput.value;
+    if (!text.trim()) return;
+
+    let key;
+    try {
+        key = await importPublicKey(text);
+        if (publicKeyInput.value !== text) return;
+    } catch (error) {
+        if (publicKeyInput.value !== text) return;
+        console.log("Invalid or incomplete public key:", error);
+        showEncryptError("Could not import public key.");
+        return;
+    }
+    try {
+        validateRsaKeyForEncryption(key);
+    } catch (error) {
+        if (publicKeyInput.value !== text) return;
+
+        console.error("Public key import or validation failed:", error);
+        if (error instanceof ClavimitError) {
+            showEncryptError(error.message);
+        } else {
+            showEncryptError("Could not import or validate public key.");
+        }
+    }
 });
 //
 

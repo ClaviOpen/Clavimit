@@ -6,6 +6,11 @@
 // implements no custom cryptographic primitives.
 
 import { ClavimitError } from "./exeptions.js";
+import {
+    MIN_RSA_ENC_EXPONENT,
+    MAX_RSA_ENC_EXPONENT,
+    MIN_RSA_MODULUS,
+} from "./config.js";
 
 const encoder = new TextEncoder();
 
@@ -53,6 +58,7 @@ export async function encryptMessage(text, publicKeyPem, senderPublicKeyPem) {
     let recipientRsaKey;
     try {
         recipientRsaKey = await importPublicKey(publicKeyPem);
+        validateRsaKeyForEncryption(recipientRsaKey);
     } catch {
         throw new ClavimitError(
             "INVALID_RECIPIENT_PUBLIC_KEY",
@@ -68,6 +74,7 @@ export async function encryptMessage(text, publicKeyPem, senderPublicKeyPem) {
         let senderRsaKey;
         try {
             senderRsaKey = await importPublicKey(senderPublicKeyPem);
+            validateRsaKeyForEncryption(senderRsaKey);
         } catch {
             throw new ClavimitError(
                 "INVALID_SENDER_PUBLIC_KEY",
@@ -108,7 +115,6 @@ export async function importPublicKey(pem) {
 
         if (invalid) {
             console.log("Invalid characters:", invalid);
-
             throw new Error("Public key contains invalid Base64 characters");
         }
 
@@ -117,10 +123,8 @@ export async function importPublicKey(pem) {
         }
 
         const binary = atob(cleanPem);
-
         const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
-
-        return await crypto.subtle.importKey(
+        const key = await crypto.subtle.importKey(
             "spki",
             bytes.buffer,
             {
@@ -130,6 +134,8 @@ export async function importPublicKey(pem) {
             false,
             ["encrypt"],
         );
+
+        return key;
     } catch (error) {
         console.error("Public key import failed:", error);
 
@@ -305,4 +311,41 @@ function toPem(buffer, label) {
     const lines = base64.match(/.{1,64}/g).join("\n");
 
     return `-----BEGIN ${label}-----\n${lines}\n-----END ${label}-----`;
+}
+
+export function validateRsaKeyForEncryption(key) {
+    const algorithm = key.algorithm;
+    if (algorithm.name !== "RSA-OAEP") {
+        throw new Error("Expected an RSA-OAEP key.");
+    }
+
+    if (key.type !== "public") {
+        throw new Error("Expected an RSA public key.");
+    }
+    if (algorithm.modulusLength < MIN_RSA_MODULUS) {
+        throw new ClavimitError(
+            "RSA_MODULUS_TOO_SMALL",
+            "RSA modulus must be at least 2048 bits.",
+        );
+    }
+
+    const exponentBytes = new Uint8Array(algorithm.publicExponent);
+    let exponent = 0n;
+    for (const byte of exponentBytes) {
+        exponent = (exponent << 8n) | BigInt(byte);
+    }
+
+    if (
+        exponent < MIN_RSA_ENC_EXPONENT ||
+        exponent >= MAX_RSA_ENC_EXPONENT ||
+        exponent % 2n === 0n
+    ) {
+        throw new ClavimitError(
+            "RSA_EXPONENT_INVALID",
+            "RSA public exponent does not meet security requirements.",
+        );
+    }
+    if (algorithm.hash.name !== "SHA-256") {
+        throw new Error("RSA-OAEP must use SHA-256.");
+    }
 }
