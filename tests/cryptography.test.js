@@ -306,4 +306,16 @@ describe("RSA public key validation", () => {
         const key = createMockKey({ hash: "SHA-1" });
         expect(() => validateRsaKeyForEncryption(key)).toThrow(Error);
     });
+
+    it("accepts a 2048-bit RSA modulus", () => {
+        const key = createMockKey({ modulusLength: 2048 });
+
+        expect(() => validateRsaKeyForEncryption(key)).not.toThrow();
+    });
+
+    it("rejects a 2047-bit RSA modulus", () => {
+        const key = createMockKey({ modulusLength: 2047 });
+
+        expect(() => validateRsaKeyForEncryption(key)).toThrow(ClavimitError);
+    });
 });

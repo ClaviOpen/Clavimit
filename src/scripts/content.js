@@ -201,8 +201,6 @@ senderPublicKeyInput.addEventListener("input", async () => {
         } else {
             showEncryptError("Could not import or validate public key.");
         }
-        if (senderPublicKeyInput.value !== text) return;
-        senderPublicKeyInput.value = text;
     }
 });
 
@@ -232,7 +230,6 @@ publicKeyInput.addEventListener("input", async () => {
         } else {
             showEncryptError("Could not import or validate public key.");
         }
-        if (publicKeyInput.value !== text) return;
     }
 });
 //

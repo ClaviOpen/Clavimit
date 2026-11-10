@@ -6,7 +6,11 @@
 // implements no custom cryptographic primitives.
 
 import { ClavimitError } from "./exeptions.js";
-import { MIN_RSA_ENC_EXPONENT, MAX_RSA_ENC_EXPONENT } from "./config.js";
+import {
+    MIN_RSA_ENC_EXPONENT,
+    MAX_RSA_ENC_EXPONENT,
+    MIN_RSA_MODULUS,
+} from "./config.js";
 
 const encoder = new TextEncoder();
 
@@ -70,6 +74,7 @@ export async function encryptMessage(text, publicKeyPem, senderPublicKeyPem) {
         let senderRsaKey;
         try {
             senderRsaKey = await importPublicKey(senderPublicKeyPem);
+            validateRsaKeyForEncryption(senderRsaKey);
         } catch {
             throw new ClavimitError(
                 "INVALID_SENDER_PUBLIC_KEY",
@@ -317,7 +322,7 @@ export function validateRsaKeyForEncryption(key) {
     if (key.type !== "public") {
         throw new Error("Expected an RSA public key.");
     }
-    if (algorithm.modulusLength < 2048) {
+    if (algorithm.modulusLength < MIN_RSA_MODULUS) {
         throw new ClavimitError(
             "RSA_MODULUS_TOO_SMALL",
             "RSA modulus must be at least 2048 bits.",
