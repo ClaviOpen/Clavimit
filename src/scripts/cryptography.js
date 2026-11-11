@@ -131,7 +131,7 @@ export async function importPublicKey(pem) {
                 name: "RSA-OAEP",
                 hash: "SHA-256",
             },
-            false,
+            true,
             ["encrypt"],
         );
 
@@ -352,15 +352,10 @@ export function validateRsaKeyForEncryption(key) {
 }
 
 
-export async function computeFingerprint(pem){
-    const cleanPem = pem
-        .replace("-----BEGIN PUBLIC KEY-----", "")
-        .replace("-----END PUBLIC KEY-----", "")
-        .replace(/\s+/g, "");
 
-    const binary = atob(cleanPem);
-    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
-    const digest = await crypto.subtle.digest("SHA-256", bytes);
+export async function computeFingerprint(publicKey) {
+    const spki = await crypto.subtle.exportKey("spki", publicKey);
+    const digest = await crypto.subtle.digest("SHA-256", spki);
     return Array.from(new Uint8Array(digest))
         .map((byte) => byte.toString(16).padStart(2, "0"))
         .join("");
