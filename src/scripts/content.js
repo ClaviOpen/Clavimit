@@ -9,7 +9,6 @@ import {
     encryptMessage,
     decryptMessage,
     generateKeyPair,
-    importPublicKey,
     validateRsaKeyForEncryption,
     computeFingerprint,
     importPublicKey,
@@ -52,6 +51,7 @@ function clearDecryptError() {
 }
 
 const encryptError = document.getElementById("encryptError");
+const senderPKError = document.getElementById("senderPKError");
 
 function showEncryptError(message) {
     encryptError.textContent = message;
@@ -61,6 +61,16 @@ function showEncryptError(message) {
 function clearEncryptError() {
     encryptError.textContent = "";
     encryptError.hidden = true;
+}
+
+function showSenderPKError(message) {
+    senderPKError.textContent = message;
+    senderPKError.hidden = false;
+}
+
+function clearSenderPKError() {
+    senderPKError.textContent = "";
+    senderPKError.hidden = true;
 }
 
 function downloadPem(filename, pem) {
@@ -185,6 +195,7 @@ senderPublicKeyFile.addEventListener("change", async () => {
 
 senderPublicKeyInput.addEventListener("input", async () => {
     clearEncryptError();
+    clearSenderPKError();
     const text = senderPublicKeyInput.value;
     if (!text.trim()) return;
 
@@ -195,7 +206,7 @@ senderPublicKeyInput.addEventListener("input", async () => {
     } catch (error) {
         if (senderPublicKeyInput.value !== text) return;
         console.log("Invalid or incomplete public key:", error);
-        showEncryptError("Could not import public key.");
+        showSenderPKError("Could not import public key.");
         return;
     }
     try {
@@ -205,9 +216,9 @@ senderPublicKeyInput.addEventListener("input", async () => {
 
         console.error("Public key import or validation failed:", error);
         if (error instanceof ClavimitError) {
-            showEncryptError(error.message);
+            showSenderPKError(error.message);
         } else {
-            showEncryptError("Could not import or validate public key.");
+            showSenderPKError("Could not import or validate public key.");
         }
     }
 });
@@ -231,6 +242,18 @@ publicKeyInput.addEventListener("input", async () => {
     }
     try {
         validateRsaKeyForEncryption(key);
+        try {
+            const fingerprint = await computeFingerprint(key);
+            if (publicKeyInput.value !== text) return;
+            publicKeyFingerprint.textContent = `SHA-256 fingerprint: ${fingerprint}`;
+            publicKeyFingerprint.hidden = false;
+        } catch (error) {
+            if (publicKeyInput.value !== text) return;
+            console.log("Invalid or incomplete public key:", error);
+            showEncryptError(
+                "Could not compute the fingerprint. Please check that the public key is valid.",
+            );
+        }
     } catch (error) {
         if (publicKeyInput.value !== text) return;
         console.error("Public key import or validation failed:", error);
@@ -240,40 +263,8 @@ publicKeyInput.addEventListener("input", async () => {
             showEncryptError("Could not import or validate public key.");
         }
     }
-    try {
-        const fingerprint = await computeFingerprint(key);
-        if (publicKeyInput.value !== text) return;
-        publicKeyFingerprint.textContent = `SHA-256 fingerprint: ${fingerprint}`;
-        publicKeyFingerprint.hidden = false;
-    } catch (error) {
-        if (publicKeyInput.value !== text) return;
-        console.log("Invalid or incomplete public key:", error);
-        showEncryptError(
-            "Could not compute the fingerprint. Please check that the public key is valid.",
-        );
-    }
 });
 
-publicKeyInput.addEventListener("input", async () => {
-    clearEncryptError();
-    publicKeyFingerprint.textContent = "";
-    publicKeyFingerprint.hidden = true;
-    const text = publicKeyInput.value;
-    if (!text.trim()) return;
-    try {
-        const pk = await importPublicKey(text);
-        const fingerprint = await computeFingerprint(pk);
-        if (publicKeyInput.value !== text) return;
-        publicKeyFingerprint.textContent = `SHA-256 fingerprint: ${fingerprint}`;
-        publicKeyFingerprint.hidden = false;
-    } catch (error) {
-        if (publicKeyInput.value !== text) return;
-        console.log("Invalid or incomplete public key:", error);
-        showEncryptError(
-            "Could not compute the fingerprint. Please check that the public key is valid.",
-        );
-    }
-});
 //
 
 // Email decryption handler
