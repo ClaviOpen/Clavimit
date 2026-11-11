@@ -50,28 +50,38 @@ function clearDecryptError() {
     decryptError.hidden = true;
 }
 
+function showParagraphError(element, message) {
+    element.textContent = message;
+    element.hidden = false;
+}
+
+function clearParagraphError(element) {
+    element.textContent = "";
+    element.hidden = true;
+}
+
 const encryptError = document.getElementById("encryptError");
 const senderPKError = document.getElementById("senderPKError");
 
-function showEncryptError(message) {
-    encryptError.textContent = message;
-    encryptError.hidden = false;
-}
+// function showEncryptError(message) {
+//     encryptError.textContent = message;
+//     encryptError.hidden = false;
+// }
 
-function clearEncryptError() {
-    encryptError.textContent = "";
-    encryptError.hidden = true;
-}
+// function clearEncryptError() {
+//     encryptError.textContent = "";
+//     encryptError.hidden = true;
+// }
 
-function showSenderPKError(message) {
-    senderPKError.textContent = message;
-    senderPKError.hidden = false;
-}
+// function showSenderPKError(message) {
+//     senderPKError.textContent = message;
+//     senderPKError.hidden = false;
+// }
 
-function clearSenderPKError() {
-    senderPKError.textContent = "";
-    senderPKError.hidden = true;
-}
+// function clearSenderPKError() {
+//     senderPKError.textContent = "";
+//     senderPKError.hidden = true;
+// }
 
 function downloadPem(filename, pem) {
     const blob = new Blob([pem], { type: "application/x-pem-file" });
@@ -169,7 +179,8 @@ privateKeyFile.addEventListener("change", async () => {
 });
 
 publicKeyFile.addEventListener("change", async () => {
-    clearEncryptError();
+    //clearEncryptError();
+    clearParagraphError(encryptError);
     const file = publicKeyFile.files[0];
     if (!file) return;
     try {
@@ -179,7 +190,11 @@ publicKeyFile.addEventListener("change", async () => {
         publicKeyInput.dispatchEvent(new Event("input", { bubbles: true }));
     } catch (error) {
         console.error("Could not read public key file:", error);
-        showEncryptError("Could not read the selected public key file.");
+        //showEncryptError("Could not read the selected public key file.");
+        showParagraphError(
+            encryptError,
+            "Could not read the selected public key file.",
+        );
     }
 });
 
@@ -194,8 +209,10 @@ senderPublicKeyFile.addEventListener("change", async () => {
 });
 
 senderPublicKeyInput.addEventListener("input", async () => {
-    clearEncryptError();
-    clearSenderPKError();
+    //clearParagraphError(encryptError);
+    clearParagraphError(senderPKError);
+    // clearEncryptError(encryptError);
+    // clearSenderPKError(senderPKError);
     const text = senderPublicKeyInput.value;
     if (!text.trim()) return;
 
@@ -206,7 +223,8 @@ senderPublicKeyInput.addEventListener("input", async () => {
     } catch (error) {
         if (senderPublicKeyInput.value !== text) return;
         console.log("Invalid or incomplete public key:", error);
-        showSenderPKError("Could not import public key.");
+        showParagraphError(senderPKError, "Could not import public key.");
+        //showSenderPKError("Could not import public key.");
         return;
     }
     try {
@@ -216,15 +234,21 @@ senderPublicKeyInput.addEventListener("input", async () => {
 
         console.error("Public key import or validation failed:", error);
         if (error instanceof ClavimitError) {
-            showSenderPKError(error.message);
+            //showSenderPKError(error.message);
+            showParagraphError(senderPKError, error.message);
         } else {
-            showSenderPKError("Could not import or validate public key.");
+            showParagraphError(
+                senderPKError,
+                "Could not import or validate public key.",
+            );
+            //showSenderPKError("Could not import or validate public key.");
         }
     }
 });
 
 publicKeyInput.addEventListener("input", async () => {
-    clearEncryptError();
+    //clearEncryptError();
+    clearParagraphError(encryptError);
     publicKeyFingerprint.textContent = "";
     publicKeyFingerprint.hidden = true;
     const text = publicKeyInput.value;
@@ -237,7 +261,8 @@ publicKeyInput.addEventListener("input", async () => {
     } catch (error) {
         if (publicKeyInput.value !== text) return;
         console.log("Invalid or incomplete public key:", error);
-        showEncryptError("Could not import public key.");
+        //showEncryptError("Could not import public key.");
+        showParagraphError(encryptError, "Could not import public key.");
         return;
     }
     try {
@@ -250,7 +275,8 @@ publicKeyInput.addEventListener("input", async () => {
         } catch (error) {
             if (publicKeyInput.value !== text) return;
             console.log("Invalid or incomplete public key:", error);
-            showEncryptError(
+            showParagraphError(
+                encryptError,
                 "Could not compute the fingerprint. Please check that the public key is valid.",
             );
         }
@@ -258,9 +284,14 @@ publicKeyInput.addEventListener("input", async () => {
         if (publicKeyInput.value !== text) return;
         console.error("Public key import or validation failed:", error);
         if (error instanceof ClavimitError) {
-            showEncryptError(error.message);
+            showParagraphError(encryptError, error.message);
+            //showEncryptError(error.message);
         } else {
-            showEncryptError("Could not import or validate public key.");
+            showParagraphError(
+                encryptError,
+                "Could not import or validate public key.",
+            );
+            //showEncryptError("Could not import or validate public key.");
         }
     }
 });
@@ -274,7 +305,8 @@ copyDecryptedTextButton.addEventListener("click", async () => {
     await navigator.clipboard.writeText(decryptedText.value);
 });
 decryptButton.addEventListener("click", async () => {
-    clearDecryptError();
+    //clearDecryptError();
+    clearParagraphError(decryptError);
     document.getElementById("decryptionResultArea").hidden = true;
     clearStatus(decryptStatus);
     try {
@@ -296,11 +328,16 @@ decryptButton.addEventListener("click", async () => {
         console.error("Decryption error:", error);
 
         if (error instanceof ClavimitError) {
-            showDecryptError(error.message);
+            showParagraphError(decryptError, error.message);
+            //showDecryptError(error.message);
         } else {
-            showDecryptError(
+            showParagraphError(
+                decryptError,
                 "Something went wrong while decrypting the message.",
             );
+            // showDecryptError(
+            //     "Something went wrong while decrypting the message.",
+            // );
         }
     } finally {
         decryptButton.disabled = false;
@@ -312,8 +349,10 @@ decryptButton.addEventListener("click", async () => {
 
 // Email encryption handler
 button.addEventListener("click", async () => {
-    clearEncryptError();
+    //clearEncryptError();
+    clearParagraphError(encryptError);
     clearStatus(encryptStatus);
+    clearParagraphError(senderPKError);
     try {
         const publicKey = publicKeyInput.value.trim();
         if (!publicKey) {
@@ -367,9 +406,13 @@ button.addEventListener("click", async () => {
         console.error("Encryption error:", error);
 
         if (error instanceof ClavimitError) {
-            showEncryptError(error.message);
+            showParagraphError(encryptError, error.message);
         } else {
-            showEncryptError("Something unexpected went wrong.");
+            showParagraphError(
+                encryptError,
+                "Something unexpected went wrong.",
+            );
+            //showEncryptError("Something unexpected went wrong.");
         }
     } finally {
         button.disabled = false;
