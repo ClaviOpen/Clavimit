@@ -11,6 +11,7 @@ import {
     generateKeyPair,
     importPublicKey,
     validateRsaKeyForEncryption,
+    computeFingerprint
 } from "./cryptography.js";
 import {
     getReceivedEmailText,
