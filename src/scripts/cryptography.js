@@ -313,7 +313,6 @@ function toPem(buffer, label) {
     return `-----BEGIN ${label}-----\n${lines}\n-----END ${label}-----`;
 }
 
-
 export function validateRsaKeyForEncryption(key) {
     const algorithm = key.algorithm;
     if (algorithm.name !== "RSA-OAEP") {
@@ -351,8 +350,6 @@ export function validateRsaKeyForEncryption(key) {
     }
 }
 
-
-
 export async function computeFingerprint(publicKey) {
     const spki = await crypto.subtle.exportKey("spki", publicKey);
     const digest = await crypto.subtle.digest("SHA-256", spki);
@@ -360,4 +357,3 @@ export async function computeFingerprint(publicKey) {
         .map((byte) => byte.toString(16).padStart(2, "0"))
         .join("");
 }
-

@@ -171,7 +171,6 @@ publicKeyFile.addEventListener("change", async () => {
         console.error("Could not read public key file:", error);
         showEncryptError("Could not read the selected public key file.");
     }
-
 });
 
 senderPublicKeyFile.addEventListener("change", async () => {

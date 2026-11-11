@@ -2,9 +2,9 @@ import { describe, it, expect } from "vitest";
 import {
     encryptMessage,
     decryptMessage,
-    importPrivateKey,
+    importPublicKey,
     validateRsaKeyForEncryption,
-    computeFingerprint
+    computeFingerprint,
 } from "#src/scripts/cryptography";
 import { ClavimitError } from "#src/scripts/exeptions";
 
