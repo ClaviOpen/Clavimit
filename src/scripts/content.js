@@ -215,6 +215,8 @@ senderPublicKeyInput.addEventListener("input", async () => {
 
 publicKeyInput.addEventListener("input", async () => {
     clearEncryptError();
+    publicKeyFingerprint.textContent = "";
+    publicKeyFingerprint.hidden = true;
     const text = publicKeyInput.value;
     if (!text.trim()) return;
 
@@ -232,13 +234,24 @@ publicKeyInput.addEventListener("input", async () => {
         validateRsaKeyForEncryption(key);
     } catch (error) {
         if (publicKeyInput.value !== text) return;
-
         console.error("Public key import or validation failed:", error);
         if (error instanceof ClavimitError) {
             showEncryptError(error.message);
         } else {
             showEncryptError("Could not import or validate public key.");
         }
+    }
+    try {
+        const fingerprint = await computeFingerprint(key);
+        if (publicKeyInput.value !== text) return;
+        publicKeyFingerprint.textContent = `SHA-256 fingerprint: ${fingerprint}`;
+        publicKeyFingerprint.hidden = false;
+    } catch (error) {
+        if (publicKeyInput.value !== text) return;
+        console.log("Invalid or incomplete public key:", error);
+        showEncryptError(
+            "Could not compute the fingerprint. Please check that the public key is valid.",
+        );
     }
 });
 
