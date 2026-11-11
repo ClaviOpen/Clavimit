@@ -86,6 +86,7 @@
 				</p>
 
 				<input type="file" id="publicKeyFile" accept=".pem,.key,.txt">
+				<p id="publicKeyFingerPrint" class="public-key-fingerprint" hidden></p>
 				<p id="encryptError" class="error-message" hidden></p>
 				<textarea id="publicKey" rows="8" placeholder="-----BEGIN PUBLIC KEY-----"></textarea>
 				<label for="encryptWithSenderPublicKey">
@@ -94,6 +95,7 @@
 				</label>
 				<div id="encryptWithSenderPublicKeyDiv" hidden>
 					<input type="file" id="senderPublicKeyFile" accept=".pem,.key,.txt">
+					<p id="senderPKError" class="error-message" hidden></p>
 					<textarea id="senderPublicKey" rows="8" placeholder="-----BEGIN PUBLIC KEY-----"></textarea>
 				</div>
 				<fieldset>

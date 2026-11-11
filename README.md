@@ -154,11 +154,13 @@ The following requirements are enforced:
 
 Public keys that do not satisfy these requirements are rejected for encryption.
 
-#### Backward compatibility
-
 **Note on Backward compatibility**. Previous versions of Clavimit did not enforce these requirements. Consequently, some messages may have been encrypted using RSA keys that no longer satisfy the current security policy.
 Clavimit continues to support decryption using legacy RSA private keys.
 This allows users to access previously encrypted messages without permitting the creation of new messages using weak RSA public keys.
+
+### Public key fingerprints
+
+Clavimit displays the SHA-256 fingerprint of imported RSA public keys to facilitate manual verification. **Clavimit does not verify key ownership or authenticity.** Users are responsible for comparing fingerprints through a separate, trusted communication channel. Automatic key verification is not currently supported.
 
 ## Key ownership
 
@@ -258,7 +260,6 @@ The next planned improvements focus on extending the current email workflow and 
 
 Longer-term features that may be explored include:
 
-* public-key fingerprint display
 * digital signatures
 * signature verification using user-provided public keys
 * support for additional cryptographic algorithms
