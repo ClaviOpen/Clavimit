@@ -40,16 +40,6 @@ const keyGenerationStatus = document.getElementById("keyGenerationStatus");
 
 const decryptError = document.getElementById("decryptError");
 
-function showDecryptError(message) {
-    decryptError.textContent = message;
-    decryptError.hidden = false;
-}
-
-function clearDecryptError() {
-    decryptError.textContent = "";
-    decryptError.hidden = true;
-}
-
 function showParagraphError(element, message) {
     element.textContent = message;
     element.hidden = false;
@@ -62,26 +52,6 @@ function clearParagraphError(element) {
 
 const encryptError = document.getElementById("encryptError");
 const senderPKError = document.getElementById("senderPKError");
-
-// function showEncryptError(message) {
-//     encryptError.textContent = message;
-//     encryptError.hidden = false;
-// }
-
-// function clearEncryptError() {
-//     encryptError.textContent = "";
-//     encryptError.hidden = true;
-// }
-
-// function showSenderPKError(message) {
-//     senderPKError.textContent = message;
-//     senderPKError.hidden = false;
-// }
-
-// function clearSenderPKError() {
-//     senderPKError.textContent = "";
-//     senderPKError.hidden = true;
-// }
 
 function downloadPem(filename, pem) {
     const blob = new Blob([pem], { type: "application/x-pem-file" });
@@ -179,7 +149,6 @@ privateKeyFile.addEventListener("change", async () => {
 });
 
 publicKeyFile.addEventListener("change", async () => {
-    //clearEncryptError();
     clearParagraphError(encryptError);
     const file = publicKeyFile.files[0];
     if (!file) return;
@@ -190,7 +159,6 @@ publicKeyFile.addEventListener("change", async () => {
         publicKeyInput.dispatchEvent(new Event("input", { bubbles: true }));
     } catch (error) {
         console.error("Could not read public key file:", error);
-        //showEncryptError("Could not read the selected public key file.");
         showParagraphError(
             encryptError,
             "Could not read the selected public key file.",
@@ -209,10 +177,7 @@ senderPublicKeyFile.addEventListener("change", async () => {
 });
 
 senderPublicKeyInput.addEventListener("input", async () => {
-    //clearParagraphError(encryptError);
     clearParagraphError(senderPKError);
-    // clearEncryptError(encryptError);
-    // clearSenderPKError(senderPKError);
     const text = senderPublicKeyInput.value;
     if (!text.trim()) return;
 
@@ -224,7 +189,6 @@ senderPublicKeyInput.addEventListener("input", async () => {
         if (senderPublicKeyInput.value !== text) return;
         console.log("Invalid or incomplete public key:", error);
         showParagraphError(senderPKError, "Could not import public key.");
-        //showSenderPKError("Could not import public key.");
         return;
     }
     try {
@@ -234,20 +198,17 @@ senderPublicKeyInput.addEventListener("input", async () => {
 
         console.error("Public key import or validation failed:", error);
         if (error instanceof ClavimitError) {
-            //showSenderPKError(error.message);
             showParagraphError(senderPKError, error.message);
         } else {
             showParagraphError(
                 senderPKError,
                 "Could not import or validate public key.",
             );
-            //showSenderPKError("Could not import or validate public key.");
         }
     }
 });
 
 publicKeyInput.addEventListener("input", async () => {
-    //clearEncryptError();
     clearParagraphError(encryptError);
     publicKeyFingerprint.textContent = "";
     publicKeyFingerprint.hidden = true;
@@ -261,7 +222,6 @@ publicKeyInput.addEventListener("input", async () => {
     } catch (error) {
         if (publicKeyInput.value !== text) return;
         console.log("Invalid or incomplete public key:", error);
-        //showEncryptError("Could not import public key.");
         showParagraphError(encryptError, "Could not import public key.");
         return;
     }
@@ -285,13 +245,11 @@ publicKeyInput.addEventListener("input", async () => {
         console.error("Public key import or validation failed:", error);
         if (error instanceof ClavimitError) {
             showParagraphError(encryptError, error.message);
-            //showEncryptError(error.message);
         } else {
             showParagraphError(
                 encryptError,
                 "Could not import or validate public key.",
             );
-            //showEncryptError("Could not import or validate public key.");
         }
     }
 });
