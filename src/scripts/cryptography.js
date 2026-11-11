@@ -349,3 +349,12 @@ export function validateRsaKeyForEncryption(key) {
         throw new Error("RSA-OAEP must use SHA-256.");
     }
 }
+
+export async function computeFingerprint(publicKey){
+    const key = importPublicKey(publicKey);
+    const digest = await crypto.subtle.digest("SHA-256", key);
+    return Array.from(new Uint8Array(digest))
+        .map(byte => byte.toString(16).padStart(2, "0"))
+        .join(":")
+        .toUpperCase();
+}
