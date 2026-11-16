@@ -11,8 +11,8 @@ import {
     PAYLOAD_VERSION,
     ALGORITHM,
     KEY_ALGORITHM,
-} from "./config.js";
-import { ClavimitError } from "./exeptions.js";
+} from "../config.js";
+import { ClavimitError } from "../exeptions.js";
 
 export function createMessageBody(encrypted) {
     return {
@@ -99,4 +99,21 @@ export function parseMessage(text) {
     const json = text.slice(start + MESSAGE_BEGIN.length, finish).trim();
 
     return deserializeMessage(json);
+}
+
+export class MessageFormat {
+    constructor({ version, label }) {
+        if (new.target === MessageFormat) {
+            throw new TypeError("MessageFormat is abstract; subclass it.");
+        }
+        this.version = version;
+        this.label = label;
+        Object.freeze(this);
+    }
+
+    encryptMessage(message, publicKeyPem, senderPublicKeyPem) {}
+
+    decryptMessage(message, privateKeyPem) {}
+
+    validate(message) {}
 }

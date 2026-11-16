@@ -43,8 +43,8 @@ async function encryptAESKey(rsaKey, AesKey) {
     return encKey;
 }
 
-export async function encryptMessage(text, publicKeyPem, senderPublicKeyPem) {
-    const key = await crypto.subtle.generateKey(
+export async function generateAESKey() {
+    return await crypto.subtle.generateKey(
         {
             name: "AES-GCM",
             length: 256,
@@ -52,7 +52,16 @@ export async function encryptMessage(text, publicKeyPem, senderPublicKeyPem) {
         true,
         ["encrypt", "decrypt"],
     );
+}
 
+export async function constuctEncryptedAESKey(aesKey, publicKey) {
+    const rawKey = await crypto.subtle.exportKey("raw", aesKey);
+    const encryptedKey = await encryptAESKey(publicKey, rawKey);
+    return toBase64(encryptedKey);
+}
+
+export async function encryptMessage(text, publicKeyPem, senderPublicKeyPem) {
+    const key = await generateAESKey();
     const encryptedText = await encrypt(text, key);
 
     let recipientRsaKey;
@@ -67,7 +76,6 @@ export async function encryptMessage(text, publicKeyPem, senderPublicKeyPem) {
     }
 
     const rawKey = await crypto.subtle.exportKey("raw", key);
-
     const encKey = await encryptAESKey(recipientRsaKey, rawKey);
     let senderEncKey = null;
     if (senderPublicKeyPem) {

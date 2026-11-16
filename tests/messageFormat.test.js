@@ -4,7 +4,7 @@ import {
     parseMessage,
     deserializeMessage,
     validateMessage,
-} from "#src/scripts/messageFormat.js";
+} from "#src/scripts/messageFormats/messageFormat.js";
 
 import {
     MESSAGE_BEGIN,

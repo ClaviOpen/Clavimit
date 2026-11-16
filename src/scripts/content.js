@@ -19,7 +19,10 @@ import {
     getInputEmailText,
     openComposeWindow,
 } from "./emailParser.js";
-import { parseMessage, composeMessage } from "./messageFormat.js";
+import {
+    parseMessage,
+    composeMessage,
+} from "./messageFormats/messageFormat.js";
 import { ClavimitError } from "./exeptions.js";
 
 function setStatus(element, message, success = false) {
