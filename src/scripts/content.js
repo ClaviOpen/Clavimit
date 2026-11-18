@@ -357,7 +357,11 @@ button.addEventListener("click", async () => {
             );
         }
         const formatter = V1Format();
-        const enc = await formatter.encryptMessage(text, publicKey, senderPublicKey);
+        const enc = await formatter.encryptMessage(
+            text,
+            publicKey,
+            senderPublicKey,
+        );
         // const message = composeMessage(enc);
         await setEmailText(enc);
     } catch (error) {
