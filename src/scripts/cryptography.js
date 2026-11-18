@@ -12,25 +12,100 @@ import {
     MIN_RSA_MODULUS,
 } from "./config.js";
 
-const encoder = new TextEncoder();
+export class RsaOap {
+    constructor(symmetricScheme) {
+        this.symmetricScheme = symmetricScheme;
+    }
 
-export async function encrypt(text, key) {
-    const data = encoder.encode(text);
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const encrypted = await crypto.subtle.encrypt(
-        {
-            name: "AES-GCM",
+    async encryptMessage(message, publicKeyPem, senderPublicKeyPem) {
+        let recipientRsaKey;
+        try {
+            recipientRsaKey = await importPublicKey(publicKeyPem);
+            validateRsaKeyForEncryption(recipientRsaKey);
+        } catch {
+            throw new ClavimitError(
+                "INVALID_RECIPIENT_PUBLIC_KEY",
+                "The recipient's public key could not be read.",
+            );
+        }
+        const aesKey = await this.symmetricScheme.generateAESKey();
+        const { ciphertext, iv } = await this.symmetricScheme.encrypt(
+            message,
+            aesKey,
+        );
+        const encryptedKey = await constuctEncryptedAESKey(
+            aesKey,
+            recipientRsaKey,
+        );
+        let senderEncKey = null;
+        if (senderPublicKeyPem) {
+            let senderRsaKey;
+            try {
+                senderRsaKey = await importPublicKey(senderPublicKeyPem);
+                validateRsaKeyForEncryption(senderRsaKey);
+            } catch {
+                throw new ClavimitError(
+                    "INVALID_SENDER_PUBLIC_KEY",
+                    "The sender's public key could not be read.",
+                );
+            }
+            senderEncKey = await constuctEncryptedAESKey(aesKey, senderRsaKey);
+        }
+
+        return {
+            encryptedKeys: {
+                recipient: encryptedKey,
+                sender: senderEncKey,
+            },
+            ciphertext: ciphertext,
             iv: iv,
-        },
-        key,
-        data,
-    );
+        };
+    }
 
-    return {
-        ciphertext: toBase64(encrypted),
-        iv: toBase64(iv),
-    };
+    async encryptAESKey(rsaKey, AesKey) {
+        const encKey = await crypto.subtle.encrypt(
+            {
+                name: "RSA-OAEP",
+            },
+            rsaKey,
+            AesKey,
+        );
+        return encKey;
+    }
 }
+
+export const aesGcm = {
+    async encrypt(text, key) {
+        const data = encoder.encode(text);
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const encrypted = await crypto.subtle.encrypt(
+            {
+                name: "AES-GCM",
+                iv: iv,
+            },
+            key,
+            data,
+        );
+
+        return {
+            ciphertext: toBase64(encrypted),
+            iv: toBase64(iv),
+        };
+    },
+
+    async generateAESKey() {
+        return await crypto.subtle.generateKey(
+            {
+                name: "AES-GCM",
+                length: 256,
+            },
+            true,
+            ["encrypt", "decrypt"],
+        );
+    },
+};
+
+const encoder = new TextEncoder();
 
 async function encryptAESKey(rsaKey, AesKey) {
     const encKey = await crypto.subtle.encrypt(
@@ -43,17 +118,6 @@ async function encryptAESKey(rsaKey, AesKey) {
     return encKey;
 }
 
-export async function generateAESKey() {
-    return await crypto.subtle.generateKey(
-        {
-            name: "AES-GCM",
-            length: 256,
-        },
-        true,
-        ["encrypt", "decrypt"],
-    );
-}
-
 export async function constuctEncryptedAESKey(aesKey, publicKey) {
     const rawKey = await crypto.subtle.exportKey("raw", aesKey);
     const encryptedKey = await encryptAESKey(publicKey, rawKey);
@@ -61,8 +125,8 @@ export async function constuctEncryptedAESKey(aesKey, publicKey) {
 }
 
 export async function encryptMessage(text, publicKeyPem, senderPublicKeyPem) {
-    const key = await generateAESKey();
-    const encryptedText = await encrypt(text, key);
+    const key = await aesGcm.generateAESKey();
+    const encryptedText = await aesGcm.encrypt(text, key);
 
     let recipientRsaKey;
     try {

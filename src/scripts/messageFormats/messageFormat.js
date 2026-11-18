@@ -102,11 +102,12 @@ export function parseMessage(text) {
 }
 
 export class MessageFormat {
-    constructor({ version, label }) {
+    constructor({ version, scheme, label }) {
         if (new.target === MessageFormat) {
             throw new TypeError("MessageFormat is abstract; subclass it.");
         }
         this.version = version;
+        this.scheme = scheme;
         this.label = label;
         Object.freeze(this);
     }

@@ -6,7 +6,6 @@
 // messageFormat.js (wrapping/unwrapping the Clavimit message format).
 
 import {
-    encryptMessage,
     decryptMessage,
     generateKeyPair,
     validateRsaKeyForEncryption,
@@ -20,6 +19,7 @@ import {
     openComposeWindow,
 } from "./emailParser.js";
 import {
+    V1Format,
     parseMessage,
     composeMessage,
 } from "./messageFormats/messageFormat.js";
@@ -296,9 +296,6 @@ decryptButton.addEventListener("click", async () => {
                 decryptError,
                 "Something went wrong while decrypting the message.",
             );
-            // showDecryptError(
-            //     "Something went wrong while decrypting the message.",
-            // );
         }
     } finally {
         decryptButton.disabled = false;
@@ -310,7 +307,6 @@ decryptButton.addEventListener("click", async () => {
 
 // Email encryption handler
 button.addEventListener("click", async () => {
-    //clearEncryptError();
     clearParagraphError(encryptError);
     clearStatus(encryptStatus);
     clearParagraphError(senderPKError);
@@ -360,9 +356,10 @@ button.addEventListener("click", async () => {
                 "No message to encrypt provided.",
             );
         }
-        const enc = await encryptMessage(text, publicKey, senderPublicKey);
-        const message = composeMessage(enc);
-        await setEmailText(message);
+        const formatter = V1Format();
+        const enc = await formatter.encryptMessage(text, publicKey, senderPublicKey);
+        // const message = composeMessage(enc);
+        await setEmailText(enc);
     } catch (error) {
         console.error("Encryption error:", error);
 
