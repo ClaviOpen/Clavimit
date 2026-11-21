@@ -1,5 +1,6 @@
 import { MessageFormat } from "./messageFormat.js";
 import { RsaOap, aesGcm } from "../cryptography.js";
+import { PAYLOAD_VERSION, ALGORITHM, KEY_ALGORITHM } from "../config.js";
 
 export class V1Format extends MessageFormat {
     constructor() {
@@ -27,7 +28,25 @@ export class V1Format extends MessageFormat {
         };
     }
 
-    decryptMesage(message, keys) {}
+    async decryptMessage(message, privateKeyPem) {
+        const dec = await this.scheme.decryptMessage(message, privateKeyPem);
+        return dec;
+    }
 
-    validate(message) {}
+    validateMessage(message) {
+        if (!message) {
+            return false;
+        }
+        return (
+            message.version === PAYLOAD_VERSION &&
+            message.algorithm === ALGORITHM &&
+            message.keyAlgorithm === KEY_ALGORITHM &&
+            typeof message.encryptedKeys === "object" &&
+            typeof message.encryptedKeys.recipient === "string" &&
+            (message.encryptedKeys.sender === null ||
+                typeof message.encryptedKeys.sender === "string") &&
+            typeof message.iv === "string" &&
+            typeof message.ciphertext === "string"
+        );
+    }
 }

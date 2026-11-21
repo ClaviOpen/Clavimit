@@ -1,10 +1,16 @@
 import { describe, it, expect } from "vitest";
 
+// import {
+//     deserializeMessage,
+//     validateMessage,
+// } from "#src/scripts/messageFormats/messageFormat.js";
+
 import {
     parseMessage,
     deserializeMessage,
-    validateMessage,
-} from "#src/scripts/messageFormats/messageFormat.js";
+} from "#src/scripts/messageFormats/index.js";
+
+import { V1Format } from "#src/scripts/messageFormats/V1Format.js";
 
 import {
     MESSAGE_BEGIN,
@@ -27,6 +33,8 @@ const validMessage = {
     iv: "dummyIv",
     ciphertext: "dummyCiphertext",
 };
+
+const formatter = new V1Format();
 
 describe("deserialize", () => {
     it("throws INVALID_MESSAGE for invalid JSON", () => {
@@ -51,16 +59,16 @@ describe("deserialize", () => {
         );
     });
 
-    it("deserializes a valid message", () => {
-        const result = deserializeMessage(JSON.stringify(validMessage));
+    it("deserializes a valid message", async () => {
+        const result = await deserializeMessage(JSON.stringify(validMessage));
 
-        expect(result).toEqual(validMessage);
+        expect(result.message).toEqual(validMessage);
     });
 });
 
 describe("validateMessage", () => {
     it("accepts a valid message without a sender copy", () => {
-        expect(validateMessage(validMessage)).toBe(true);
+        expect(formatter.validateMessage(validMessage)).toBe(true);
     });
 
     it("accepts a valid message with a sender copy", () => {
@@ -73,11 +81,11 @@ describe("validateMessage", () => {
             },
         };
 
-        expect(validateMessage(message)).toBe(true);
+        expect(formatter.validateMessage(message)).toBe(true);
     });
 
     it("rejects null", () => {
-        expect(validateMessage(null)).toBe(false);
+        expect(formatter.validateMessage(null)).toBe(false);
     });
 
     it("rejects a message with missing encryptedKeys", () => {
@@ -87,7 +95,7 @@ describe("validateMessage", () => {
 
         delete message.encryptedKeys;
 
-        expect(validateMessage(message)).toBe(false);
+        expect(formatter.validateMessage(message)).toBe(false);
     });
 
     it("rejects a message with missing recipient encrypted key", () => {
@@ -99,7 +107,7 @@ describe("validateMessage", () => {
             },
         };
 
-        expect(validateMessage(message)).toBe(false);
+        expect(formatter.validateMessage(message)).toBe(false);
     });
 
     it("rejects an invalid sender encrypted key", () => {
@@ -112,7 +120,7 @@ describe("validateMessage", () => {
             },
         };
 
-        expect(validateMessage(message)).toBe(false);
+        expect(formatter.validateMessage(message)).toBe(false);
     });
 
     it("rejects a message with a missing ciphertext", () => {
@@ -122,7 +130,7 @@ describe("validateMessage", () => {
 
         delete message.ciphertext;
 
-        expect(validateMessage(message)).toBe(false);
+        expect(formatter.validateMessage(message)).toBe(false);
     });
 
     it("rejects a message with an invalid version", () => {
@@ -131,7 +139,7 @@ describe("validateMessage", () => {
             version: 999,
         };
 
-        expect(validateMessage(message)).toBe(false);
+        expect(formatter.validateMessage(message)).toBe(false);
     });
 
     it("rejects a message with an invalid algorithm", () => {
@@ -140,7 +148,7 @@ describe("validateMessage", () => {
             algorithm: "AES-128-CBC",
         };
 
-        expect(validateMessage(message)).toBe(false);
+        expect(formatter.validateMessage(message)).toBe(false);
     });
 
     it("rejects a message with an invalid key algorithm", () => {
@@ -149,7 +157,7 @@ describe("validateMessage", () => {
             keyAlgorithm: "RSA-PKCS1",
         };
 
-        expect(validateMessage(message)).toBe(false);
+        expect(formatter.validateMessage(message)).toBe(false);
     });
 });
 
@@ -199,7 +207,7 @@ ${MESSAGE_END}
 
         const result = parseMessage(text);
 
-        expect(result).toEqual(validMessage);
+        expect(result.message).toEqual(validMessage);
     });
 
     it("parses a Clavimit message surrounded by other text", () => {
@@ -215,7 +223,7 @@ Dummy wrapper end
 
         const result = parseMessage(text);
 
-        expect(result).toEqual(validMessage);
+        expect(result.message).toEqual(validMessage);
     });
 
     it("throws INVALID_MESSAGE when enclosed JSON is invalid", () => {
@@ -260,6 +268,6 @@ ${JSON.stringify(message)}
 ${MESSAGE_END}
 `;
 
-        expect(parseMessage(text)).toEqual(message);
+        expect(parseMessage(text).message).toEqual(message);
     });
 });

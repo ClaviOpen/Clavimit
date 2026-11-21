@@ -2,9 +2,10 @@ import { describe, it, expect } from "vitest";
 import {
     encryptMessage,
     decryptMessage,
-    importPublicKey,
     validateRsaKeyForEncryption,
     computeFingerprint,
+    RsaOap,
+    aesGcm,
 } from "#src/scripts/cryptography";
 import { ClavimitError } from "#src/scripts/exeptions";
 
@@ -56,12 +57,14 @@ function toPem(buffer, label) {
 }
 
 describe("encryption and decryption", () => {
+    const scheme = new RsaOap(aesGcm);
+
     it("encrypts and decrypts a message with the recipient key", async () => {
         const { publicKey, privateKey } = await generateKeyPair();
 
         const message = "This is a dummy message";
-        const encrypted = await encryptMessage(message, publicKey);
-        const decrypted = await decryptMessage(encrypted, privateKey);
+        const encrypted = await scheme.encryptMessage(message, publicKey);
+        const decrypted = await scheme.decryptMessage(encrypted, privateKey);
 
         expect(decrypted).toBe(message);
     });
@@ -70,8 +73,8 @@ describe("encryption and decryption", () => {
         const { publicKey, privateKey } = await generateKeyPair();
 
         const message = "";
-        const encrypted = await encryptMessage(message, publicKey);
-        const decrypted = await decryptMessage(encrypted, privateKey);
+        const encrypted = await scheme.encryptMessage(message, publicKey);
+        const decrypted = await scheme.decryptMessage(encrypted, privateKey);
 
         expect(decrypted).toBe(message);
     });
@@ -82,13 +85,16 @@ describe("encryption and decryption", () => {
 
         const message = "Message readable by sender";
 
-        const encrypted = await encryptMessage(
+        const encrypted = await scheme.encryptMessage(
             message,
             recipient.publicKey,
             sender.publicKey,
         );
 
-        const decrypted = await decryptMessage(encrypted, sender.privateKey);
+        const decrypted = await scheme.decryptMessage(
+            encrypted,
+            sender.privateKey,
+        );
 
         expect(decrypted).toBe(message);
     });
@@ -99,28 +105,31 @@ describe("encryption and decryption", () => {
 
         const message = "Message readable by recipient";
 
-        const encrypted = await encryptMessage(
+        const encrypted = await scheme.encryptMessage(
             message,
             recipient.publicKey,
             sender.publicKey,
         );
 
-        const decrypted = await decryptMessage(encrypted, recipient.privateKey);
+        const decrypted = await scheme.decryptMessage(
+            encrypted,
+            recipient.privateKey,
+        );
 
         expect(decrypted).toBe(message);
     });
 
     it("throws INVALID_RECIPIENT_PUBLIC_KEY when recipient key is empty", async () => {
-        await expect(encryptMessage("dummy message", "")).rejects.toMatchObject(
-            {
-                code: "INVALID_RECIPIENT_PUBLIC_KEY",
-            },
-        );
+        await expect(
+            scheme.encryptMessage("dummy message", ""),
+        ).rejects.toMatchObject({
+            code: "INVALID_RECIPIENT_PUBLIC_KEY",
+        });
     });
 
     it("throws INVALID_RECIPIENT_PUBLIC_KEY when recipient key is invalid", async () => {
         await expect(
-            encryptMessage("dummy message", "dummy key"),
+            scheme.encryptMessage("dummy message", "dummy key"),
         ).rejects.toMatchObject({
             code: "INVALID_RECIPIENT_PUBLIC_KEY",
         });
@@ -130,7 +139,7 @@ describe("encryption and decryption", () => {
         const recipient = await generateKeyPair();
 
         await expect(
-            encryptMessage(
+            scheme.encryptMessage(
                 "dummy message",
                 recipient.publicKey,
                 "dummy sender key",
@@ -143,7 +152,7 @@ describe("encryption and decryption", () => {
     it("does not create a sender key when none is provided", async () => {
         const recipient = await generateKeyPair();
 
-        const encrypted = await encryptMessage(
+        const encrypted = await scheme.encryptMessage(
             "dummy message",
             recipient.publicKey,
         );
@@ -157,7 +166,7 @@ describe("encryption and decryption", () => {
         const recipient = await generateKeyPair();
         const sender = await generateKeyPair();
 
-        const encrypted = await encryptMessage(
+        const encrypted = await scheme.encryptMessage(
             "dummy message",
             recipient.publicKey,
             sender.publicKey,
@@ -173,14 +182,14 @@ describe("encryption and decryption", () => {
         const sender = await generateKeyPair();
         const stranger = await generateKeyPair();
 
-        const encrypted = await encryptMessage(
+        const encrypted = await scheme.encryptMessage(
             "secret message",
             recipient.publicKey,
             sender.publicKey,
         );
 
         await expect(
-            decryptMessage(encrypted, stranger.privateKey),
+            scheme.decryptMessage(encrypted, stranger.privateKey),
         ).rejects.toMatchObject({
             code: "DECRYPTION_FAILED",
         });
@@ -251,7 +260,10 @@ describe("encryption and decryption", () => {
         };
 
         // Decrypt using Clavimit
-        const decrypted = await decryptMessage(encryptedMessage, privateKeyPem);
+        const decrypted = await scheme.decryptMessage(
+            encryptedMessage,
+            privateKeyPem,
+        );
         expect(decrypted).toBe(plaintext);
     });
 });
@@ -329,6 +341,7 @@ describe("RSA public key validation", () => {
 });
 
 describe("Public key fingerprint", () => {
+    const scheme = new RsaOap(aesGcm);
     it("computes the expected SHA-256 SPKI fingerprint", async () => {
         const PK_PEM = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmwgWcmFpy9HtVEjpytJ8
@@ -341,7 +354,7 @@ QwIDAQAB
 -----END PUBLIC KEY-----`;
         const expectedDigest =
             "5eef6637277a452cdae279cdb3ccefd47c6107c35a0af0a426a907fc57c75e45";
-        const key = await importPublicKey(PK_PEM);
+        const key = await scheme.importPublicKey(PK_PEM);
         const fingerprint = await computeFingerprint(key);
         expect(fingerprint).toBe(expectedDigest);
     });
@@ -365,8 +378,8 @@ geUUY3YDo0KW3eLGmp65pGsij5ZWKiDD6Qs+iQAzxMZsCLpDCh0YwxbMK9IbPlr9
 Bcj5AqORdfuTSKASrXXd5usXt3PKKwMAaJNDQ7W6Ag3MkN5UQ1UDW0G/IszLmCVF
 RQIDAQAB
 -----END PUBLIC KEY-----`;
-        const publicKey1 = await importPublicKey(PK_PEM_1);
-        const publicKey2 = await importPublicKey(PK_PEM_2);
+        const publicKey1 = await scheme.importPublicKey(PK_PEM_1);
+        const publicKey2 = await scheme.importPublicKey(PK_PEM_2);
 
         const fingerprint1 = await computeFingerprint(publicKey1);
         const fingerprint2 = await computeFingerprint(publicKey2);

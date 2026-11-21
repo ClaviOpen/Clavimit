@@ -11,6 +11,8 @@ import {
     validateRsaKeyForEncryption,
     computeFingerprint,
     importPublicKey,
+    RsaOap,
+    aesGcm,
 } from "./cryptography.js";
 import {
     getReceivedEmailText,
@@ -18,11 +20,8 @@ import {
     getInputEmailText,
     openComposeWindow,
 } from "./emailParser.js";
-import {
-    V1Format,
-    parseMessage,
-    composeMessage,
-} from "./messageFormats/messageFormat.js";
+import { V1Format, composeMessage } from "./messageFormats/messageFormat.js";
+import { parseMessage } from "./messageFormats/index.js";
 import { ClavimitError } from "./exeptions.js";
 
 function setStatus(element, message, success = false) {
@@ -86,12 +85,13 @@ const generatedPublicKey = document.getElementById("generatedPublicKey");
 const generatedPrivateKey = document.getElementById("generatedPrivateKey");
 
 generateRsaKeyPairButton.addEventListener("click", async () => {
+    scheme = new RsaOap(aesGcm);
     clearStatus(keyGenerationStatus);
 
     generateRsaKeyPairButton.disabled = true;
     generateRsaKeyPairButton.textContent = "Generating key pair…";
     try {
-        const keyPair = await generateKeyPair();
+        const keyPair = await scheme.generateKeyPair();
         generatedPublicKey.value = keyPair.publicKey;
         generatedPrivateKey.value = keyPair.privateKey;
         document.getElementById("generatePublicKeyDiv").hidden = false;
@@ -220,7 +220,8 @@ publicKeyInput.addEventListener("input", async () => {
 
     let key;
     try {
-        key = await importPublicKey(text);
+        const scheme = new RsaOap(aesGcm);
+        key = await scheme.importPublicKey(text);
         if (publicKeyInput.value !== text) return;
     } catch (error) {
         if (publicKeyInput.value !== text) return;
@@ -267,6 +268,7 @@ copyDecryptedTextButton.addEventListener("click", async () => {
 });
 decryptButton.addEventListener("click", async () => {
     //clearDecryptError();
+    const formatter = new V1Format();
     clearParagraphError(decryptError);
     document.getElementById("decryptionResultArea").hidden = true;
     clearStatus(decryptStatus);
@@ -281,7 +283,7 @@ decryptButton.addEventListener("click", async () => {
         }
         const text = await getReceivedEmailText();
         const message = parseMessage(text);
-        const plaintext = await decryptMessage(message, privateKey);
+        const plaintext = await formatter.decryptMessage(message, privateKey);
         decryptedText.value = plaintext;
         document.getElementById("decryptionResultArea").hidden = false;
         setStatus(decryptStatus, "✓ Message decrypted", true);
@@ -362,7 +364,7 @@ button.addEventListener("click", async () => {
             publicKey,
             senderPublicKey,
         );
-        // const message = composeMessage(enc);
+        //const message = composeMessage(enc);
         await setEmailText(enc);
     } catch (error) {
         console.error("Encryption error:", error);
