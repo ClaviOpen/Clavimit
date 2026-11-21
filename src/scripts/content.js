@@ -6,11 +6,8 @@
 // messageFormat.js (wrapping/unwrapping the Clavimit message format).
 
 import {
-    decryptMessage,
-    generateKeyPair,
     validateRsaKeyForEncryption,
     computeFingerprint,
-    importPublicKey,
     RsaOap,
     aesGcm,
 } from "./cryptography.js";
@@ -20,9 +17,10 @@ import {
     getInputEmailText,
     openComposeWindow,
 } from "./emailParser.js";
-import { V1Format, composeMessage } from "./messageFormats/messageFormat.js";
 import { parseMessage } from "./messageFormats/index.js";
+import { composeMessage } from "./messageFormats/messageFormat.js";
 import { ClavimitError } from "./exeptions.js";
+import { V1Format } from "./messageFormats/V1Format.js";
 
 function setStatus(element, message, success = false) {
     element.textContent = message;
@@ -181,12 +179,13 @@ senderPublicKeyFile.addEventListener("change", async () => {
 
 senderPublicKeyInput.addEventListener("input", async () => {
     clearParagraphError(senderPKError);
+    const scheme = new RsaOap(aesGcm);
     const text = senderPublicKeyInput.value;
     if (!text.trim()) return;
 
     let key;
     try {
-        key = await importPublicKey(text);
+        key = await scheme.importPublicKey(text);
         if (senderPublicKeyInput.value !== text) return;
     } catch (error) {
         if (senderPublicKeyInput.value !== text) return;
@@ -267,8 +266,6 @@ copyDecryptedTextButton.addEventListener("click", async () => {
     await navigator.clipboard.writeText(decryptedText.value);
 });
 decryptButton.addEventListener("click", async () => {
-    //clearDecryptError();
-    const formatter = new V1Format();
     clearParagraphError(decryptError);
     document.getElementById("decryptionResultArea").hidden = true;
     clearStatus(decryptStatus);
@@ -282,8 +279,12 @@ decryptButton.addEventListener("click", async () => {
             );
         }
         const text = await getReceivedEmailText();
-        const message = parseMessage(text);
-        const plaintext = await formatter.decryptMessage(message, privateKey);
+        const parsed = parseMessage(text);
+        const formatter = parsed.format;
+        const plaintext = await formatter.decryptMessage(
+            parsed.message,
+            privateKey,
+        );
         decryptedText.value = plaintext;
         document.getElementById("decryptionResultArea").hidden = false;
         setStatus(decryptStatus, "✓ Message decrypted", true);
@@ -292,7 +293,6 @@ decryptButton.addEventListener("click", async () => {
 
         if (error instanceof ClavimitError) {
             showParagraphError(decryptError, error.message);
-            //showDecryptError(error.message);
         } else {
             showParagraphError(
                 decryptError,
@@ -358,14 +358,14 @@ button.addEventListener("click", async () => {
                 "No message to encrypt provided.",
             );
         }
-        const formatter = V1Format();
+        const formatter = new V1Format();
         const enc = await formatter.encryptMessage(
             text,
             publicKey,
             senderPublicKey,
         );
-        //const message = composeMessage(enc);
-        await setEmailText(enc);
+        const message = composeMessage(enc);
+        await setEmailText(message);
     } catch (error) {
         console.error("Encryption error:", error);
 

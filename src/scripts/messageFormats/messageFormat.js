@@ -13,33 +13,16 @@ import {
     KEY_ALGORITHM,
 } from "../config.js";
 
-export function createMessageBody(encrypted) {
-    return {
-        version: PAYLOAD_VERSION,
-        algorithm: ALGORITHM,
-        keyAlgorithm: KEY_ALGORITHM,
-        encryptedKeys: encrypted.encryptedKeys,
-        iv: encrypted.iv,
-        ciphertext: encrypted.ciphertext,
-    };
-}
-
-export function createMessage(encrypted) {
-    const message = createMessageBody(encrypted);
-
-    return `${MESSAGE_BEGIN}
-
-${serializeMessage(message)}
-
-${MESSAGE_END}`;
-}
-
 export function serializeMessage(message) {
     return JSON.stringify(message);
 }
 
-export function composeMessage(encrypted) {
-    return createMessage(encrypted);
+export function composeMessage(payload) {
+    return `${MESSAGE_BEGIN}
+
+${serializeMessage(payload)}
+
+${MESSAGE_END}`;
 }
 
 export class MessageFormat {
